@@ -1,0 +1,3 @@
+#!/bin/bash
+
+g++ -std=c++17 -o perfect_sum perfect_sum.cpp
