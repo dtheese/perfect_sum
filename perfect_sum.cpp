@@ -173,10 +173,6 @@ namespace
       cerr << endl;
       cerr << "Valid invocations:" << endl;
 
-      cerr << pn << endl;
-      cerr << "   Display usage" << endl;
-
-      cerr << endl;
       cerr << pn << " [-h | --help]" << endl;
       cerr << "   Display usage" << endl;
 
