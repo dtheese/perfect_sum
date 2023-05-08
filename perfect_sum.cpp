@@ -15,8 +15,8 @@ namespace
 {
    using my_uint_t = unsigned long int;
    using args_as_strings_t = vector<string>;
-   using one_perm_t = vector<my_uint_t>;
-   using all_perms_t = set<one_perm_t>;
+   using one_group_t = vector<my_uint_t>;
+   using all_groups_t = set<one_group_t>;
 
    class ostream_conditional_deleter
    {
@@ -30,21 +30,21 @@ namespace
 
    using ostream_up_t = unique_ptr<ostream, ostream_conditional_deleter>;
 
-   void build_perm(
-                     const my_uint_t N_original,
-                     my_uint_t N_remaining,
-                     my_uint_t k_remaining,
-                     one_perm_t &perm,
-                     all_perms_t &all_perms
-                  );
+   void build_group(
+                      const my_uint_t N_original,
+                      my_uint_t N_remaining,
+                      my_uint_t k_remaining,
+                      one_group_t &perm,
+                      all_groups_t &all_groups
+                   );
 
    void find_perfect_sums(
                             const my_uint_t N,
                             const my_uint_t K,
-                            all_perms_t &all_perms
+                            all_groups_t &all_groups
                          );
 
-   void print_results(const all_perms_t &all_perms);
+   void print_results(const all_groups_t &all_groups);
    void print_usage(const char *program_name);
    bool process_args(int argc, char *argv[]);
 
@@ -75,10 +75,10 @@ int main(int argc, char *argv[])
    *output_stream << "N: " << N << endl;
    *output_stream << "K: " << K << endl;
 
-   all_perms_t all_perms;
+   all_groups_t all_groups;
 
-   find_perfect_sums(N, K, all_perms);
-   print_results(all_perms);
+   find_perfect_sums(N, K, all_groups);
+   print_results(all_groups);
 
    *output_stream << endl;
 
@@ -87,18 +87,18 @@ int main(int argc, char *argv[])
 
 namespace
 {
-   void build_perm(
-                     const my_uint_t N_original,
-                     my_uint_t N_remaining,
-                     my_uint_t k_remaining,
-                     one_perm_t &perm,
-                     all_perms_t &all_perms
-                  )
+   void build_group(
+                      const my_uint_t N_original,
+                      my_uint_t N_remaining,
+                      my_uint_t k_remaining,
+                      one_group_t &perm,
+                      all_groups_t &all_groups
+                   )
    {
       if (k_remaining == 0)
       {
          if (N_remaining == 0)
-            all_perms.insert(perm);
+            all_groups.insert(perm);
 
          return;
       }
@@ -110,7 +110,7 @@ namespace
       for (my_uint_t n{0}; n <= N_original; ++n)
       {
          perm.push_back(n);
-         build_perm(N_original, N_remaining - n, k_remaining - 1, perm, all_perms);
+         build_group(N_original, N_remaining - n, k_remaining - 1, perm, all_groups);
          perm.pop_back();
       }
    }
@@ -118,21 +118,21 @@ namespace
    void find_perfect_sums(
                             const my_uint_t N,
                             const my_uint_t K,
-                            all_perms_t &all_perms
+                            all_groups_t &all_groups
                          )
    {
-      one_perm_t one_perm;
+      one_group_t one_group;
 
-      build_perm(N, N, K, one_perm, all_perms);
+      build_group(N, N, K, one_group, all_groups);
    }
 
-   void print_results(const all_perms_t &all_perms)
+   void print_results(const all_groups_t &all_groups)
    {
       *output_stream << endl;
 
-      for (const one_perm_t &one_perm : all_perms)
+      for (const one_group_t &one_group : all_groups)
       {
-         for (my_uint_t one_uint : one_perm)
+         for (my_uint_t one_uint : one_group)
             *output_stream << one_uint << " ";
 
          *output_stream << endl;
@@ -141,7 +141,7 @@ namespace
       if (display_group_count)
       {
          *output_stream << endl;
-         *output_stream << "Group count: " << all_perms.size() << endl;
+         *output_stream << "Group count: " << all_groups.size() << endl;
       }
    }
 
