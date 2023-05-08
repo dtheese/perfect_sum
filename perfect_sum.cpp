@@ -18,9 +18,9 @@ namespace
    using my_uint_t = unsigned long int;
    using args_as_strings_t = vector<string>;
 
-   using one_group_vector_t = vector<my_uint_t>; // Use variant index 0
-   using one_group_set_t = set<my_uint_t>; // Use variant index 1
-   using one_group_multiset_t = multiset<my_uint_t>; // Use variant index 2
+   using one_group_vector_t = vector<my_uint_t>;
+   using one_group_set_t = set<my_uint_t>;
+   using one_group_multiset_t = multiset<my_uint_t>;
    using one_group_t = variant<one_group_vector_t, one_group_set_t, one_group_multiset_t>;
 
    using all_groups_t = set<one_group_t>;
