@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 using namespace std;
@@ -15,8 +16,13 @@ namespace
 {
    using my_uint_t = unsigned long int;
    using args_as_strings_t = vector<string>;
-   using one_group_t = vector<my_uint_t>;
-   using all_groups_t = set<one_group_t>;
+
+   using one_group_vector_t = vector<my_uint_t>;
+   using one_group_set_t = set<my_uint_t>;
+   using one_group_multiset_t = multiset<my_uint_t>;
+   using one_group_t = variant<one_group_vector_t, one_group_set_t, one_group_multiset_t>;
+
+   using all_groups_t = set<one_group_vector_t>;
 
    class ostream_conditional_deleter
    {
@@ -34,7 +40,7 @@ namespace
                       const my_uint_t N_original,
                       my_uint_t N_remaining,
                       my_uint_t k_remaining,
-                      one_group_t &perm,
+                      one_group_vector_t &group,
                       all_groups_t &all_groups
                    );
 
@@ -91,14 +97,14 @@ namespace
                       const my_uint_t N_original,
                       my_uint_t N_remaining,
                       my_uint_t k_remaining,
-                      one_group_t &perm,
+                      one_group_vector_t &group,
                       all_groups_t &all_groups
                    )
    {
       if (k_remaining == 0)
       {
          if (N_remaining == 0)
-            all_groups.insert(perm);
+            all_groups.insert(group);
 
          return;
       }
@@ -109,9 +115,9 @@ namespace
 
       for (my_uint_t n{0}; n <= N_original; ++n)
       {
-         perm.push_back(n);
-         build_group(N_original, N_remaining - n, k_remaining - 1, perm, all_groups);
-         perm.pop_back();
+         group.push_back(n);
+         build_group(N_original, N_remaining - n, k_remaining - 1, group, all_groups);
+         group.pop_back();
       }
    }
 
@@ -121,7 +127,7 @@ namespace
                             all_groups_t &all_groups
                          )
    {
-      one_group_t one_group;
+      one_group_vector_t one_group;
 
       build_group(N, N, K, one_group, all_groups);
    }
@@ -130,7 +136,7 @@ namespace
    {
       *output_stream << endl;
 
-      for (const one_group_t &one_group : all_groups)
+      for (const one_group_vector_t &one_group : all_groups)
       {
          for (my_uint_t one_uint : one_group)
             *output_stream << one_uint << " ";
