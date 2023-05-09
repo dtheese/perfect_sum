@@ -64,6 +64,7 @@ namespace
    bool process_args(int argc, char *argv[]);
 
    // Command line arguments and flags
+   bool display_arguments{false};
    bool display_group_count{false};
    bool duplicates_allowed{false};
    bool permutations_allowed{false};
@@ -82,13 +83,17 @@ int main(int argc, char *argv[])
       return 1;
    }
 
-   *output_stream << endl;
-   *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
-   *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
-   *output_stream << "Permutations allowed: " << (permutations_allowed ? "true" : "false") << endl;
-   *output_stream << "Zeros allowed: " << (zeros_allowed ? "true" : "false") << endl;
-   *output_stream << "N: " << N << endl;
-   *output_stream << "K: " << K << endl;
+   if (display_arguments)
+   {
+      *output_stream << endl;
+      *output_stream << "Display arguments: " << (display_arguments ? "true" : "false") << endl;
+      *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
+      *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
+      *output_stream << "Permutations allowed: " << (permutations_allowed ? "true" : "false") << endl;
+      *output_stream << "Zeros allowed: " << (zeros_allowed ? "true" : "false") << endl;
+      *output_stream << "N: " << N << endl;
+      *output_stream << "K: " << K << endl;
+   }
 
    all_groups_t all_groups;
 
@@ -270,6 +275,7 @@ namespace
       cerr << "OPTIONS" << endl;
       cerr << "   Mandatory arguments to long options are mandatory for short options too." << endl;
       cerr << endl;
+      cerr << "   -a, --arguments     Display the command line arguments" << endl;
       cerr << "   -c, --count         Display the count of groups generated" << endl;
       cerr << "                       Default: Do not display the count of groups generated" << endl;
       cerr << "   -d, --duplicates    Duplicate elements are allowed to be generated" << endl;
@@ -303,6 +309,7 @@ namespace
 
          // This regex is intended to be applied to each individual argument, not to the entire command line
          const string arg_regex_string {
+                                          "(-a|--arguments)|"
                                           "(-c|--count)|"
                                           "(-d|--duplicates)|"
                                           "(-h|--help)|"
@@ -346,7 +353,9 @@ namespace
             {
                const string &s{args_as_strings[arg_index]};
 
-               if (s == "-c" || s == "--count")
+               if (s == "-a" || s == "--arguments")
+                  display_arguments = true;
+               else if (s == "-c" || s == "--count")
                   display_group_count = true;
                else if (s == "-d" || s == "--duplicates")
                   duplicates_allowed = true;
