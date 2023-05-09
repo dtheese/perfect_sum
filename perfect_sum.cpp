@@ -317,7 +317,7 @@ namespace
                                           "([0-9]+)"
                                        };
 
-         const regex arg_regex(arg_regex_string);
+         const regex arg_regex{arg_regex_string};
 
          // Extract all args as strings
          args_as_strings_t args_as_strings;
