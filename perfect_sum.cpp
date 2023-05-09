@@ -78,11 +78,7 @@ namespace
 int main(int argc, char *argv[])
 {
    if (! process_args(argc, argv))
-   {
-      cerr << endl;
-
       return 1;
-   }
 
    if (display_arguments)
       print_parameters();
@@ -92,9 +88,8 @@ int main(int argc, char *argv[])
    find_perfect_sums(N, K, all_groups);
    print_results(all_groups);
 
-   *output_stream << endl;
-
-   return 0;
+   if (output_stream.get() == &cout)
+      *output_stream << endl;
 }
 
 namespace
@@ -231,7 +226,6 @@ namespace
 
    void print_parameters()
    {
-      *output_stream << endl;
       *output_stream << "Display parameters resulting from command line arguments: " << (display_arguments ? "true" : "false") << endl;
       *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
       *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
@@ -239,12 +233,11 @@ namespace
       *output_stream << "Zeros allowed: " << (zeros_allowed ? "true" : "false") << endl;
       *output_stream << "N: " << N << endl;
       *output_stream << "K: " << K << endl;
+      *output_stream << endl;
    }
 
    void print_results(const all_groups_t &all_groups)
    {
-      *output_stream << endl;
-
       auto print_visitor_t = [](const auto &one_group)
       {
          for (my_uint_t one_uint : one_group)
@@ -268,7 +261,6 @@ namespace
    {
       string pn{program_name != nullptr ? program_name : "<program name>"};
 
-      cerr << endl;
       cerr << "USAGE" << endl;
       cerr << pn << " [OPTION]... <N> [K]" << endl;
       cerr << "   Generate all groups of positive (or, optionally, non-negative) integers that sum to the specified integer N." << endl;
@@ -302,6 +294,7 @@ namespace
       cerr << "EXIT STATUS" << endl;
       cerr << "   0 if groups could be generated as dictated by the command line arguments and flags" << endl;
       cerr << "   1 if groups could not be generated as dictated by the command line arguments and flags" << endl;
+      cerr << endl;
    }
 
    bool process_args(int argc, char *argv[])
