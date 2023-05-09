@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
    if (display_arguments)
    {
       *output_stream << endl;
-      *output_stream << "Display arguments: " << (display_arguments ? "true" : "false") << endl;
+      *output_stream << "Display parameters resulting from command line arguments: " << (display_arguments ? "true" : "false") << endl;
       *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
       *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
       *output_stream << "Permutations allowed: " << (permutations_allowed ? "true" : "false") << endl;
@@ -275,7 +275,7 @@ namespace
       cerr << "OPTIONS" << endl;
       cerr << "   Mandatory arguments to long options are mandatory for short options too." << endl;
       cerr << endl;
-      cerr << "   -a, --arguments     Display the command line arguments" << endl;
+      cerr << "   -a, --arguments     Display parameters resulting from command line arguments" << endl;
       cerr << "   -c, --count         Display the count of groups generated" << endl;
       cerr << "                       Default: Do not display the count of groups generated" << endl;
       cerr << "   -d, --duplicates    Duplicate elements are allowed to be generated" << endl;
