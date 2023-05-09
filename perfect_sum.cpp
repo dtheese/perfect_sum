@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <fstream>
@@ -23,6 +24,12 @@ namespace
    using one_group_multiset_t = multiset<my_uint_t>;
    using one_group_t = variant<one_group_vector_t, one_group_set_t, one_group_multiset_t>;
 
+   using one_group_iterator_t = variant<
+                                          one_group_vector_t::iterator,
+                                          one_group_set_t::iterator,
+                                          one_group_multiset_t::iterator
+                                       >;
+
    using all_groups_t = set<one_group_t>;
 
    class ostream_conditional_deleter
@@ -40,8 +47,9 @@ namespace
    void build_group(
                       const my_uint_t N_original,
                       my_uint_t N_remaining,
-                      my_uint_t k_remaining,
-                      one_group_t &group,
+                      const my_uint_t K_original,
+                      my_uint_t K_remaining,
+                      one_group_t &one_group,
                       all_groups_t &all_groups
                    );
 
@@ -94,31 +102,111 @@ int main(int argc, char *argv[])
 
 namespace
 {
+   class insert_visitor_t
+   {
+      public:
+         insert_visitor_t(my_uint_t n_p): n{n_p} {}
+
+         pair<one_group_iterator_t, bool> operator()(one_group_vector_t &one_group_vector) const
+         {
+            if (
+                  duplicates_allowed ||
+                  find(one_group_vector.cbegin(), one_group_vector.cend(), n) == one_group_vector.cend())
+            {
+               one_group_vector.push_back(n);
+
+               return {one_group_iterator_t{}, true};
+            }
+
+            return {one_group_iterator_t{}, false};
+         }
+
+         pair<one_group_iterator_t, bool> operator()(one_group_set_t &one_group_set) const
+         {
+            auto rval{one_group_set.insert(n)};
+            one_group_set_t::iterator iter{rval.first};
+            one_group_iterator_t one_group_iterator{in_place_index<1>, iter};
+
+            return {one_group_iterator, rval.second};
+         }
+
+         pair<one_group_iterator_t, bool> operator()(one_group_multiset_t &one_group_multiset) const
+         {
+            one_group_multiset_t::iterator iter{one_group_multiset.insert(n)};
+            one_group_iterator_t one_group_iterator{in_place_index<2>, iter};
+
+            return {one_group_iterator, true};
+         }
+
+      private:
+         my_uint_t n;
+   };
+
+   class erase_visitor_t
+   {
+      public:
+         erase_visitor_t(one_group_iterator_t one_group_iterator_p): one_group_iterator{one_group_iterator_p} {}
+
+         void operator()(one_group_vector_t &one_group_vector) const
+         {
+            one_group_vector.pop_back();
+         }
+
+         void operator()(one_group_set_t &one_group_set) const
+         {
+            one_group_set.erase(get<1>(one_group_iterator));
+         }
+
+         void operator()(one_group_multiset_t &one_group_multiset) const
+         {
+            one_group_multiset.erase(get<2>(one_group_iterator));
+         }
+
+      private:
+         one_group_iterator_t one_group_iterator;
+   };
+
    void build_group(
                       const my_uint_t N_original,
                       my_uint_t N_remaining,
-                      my_uint_t k_remaining,
-                      one_group_t &group,
+                      const my_uint_t K_original,
+                      my_uint_t K_remaining,
+                      one_group_t &one_group,
                       all_groups_t &all_groups
                    )
    {
-      if (k_remaining == 0)
+      if (K_original > 0)
+      {
+         if (K_remaining == 0)
+         {
+            if (N_remaining == 0)
+               all_groups.insert(one_group);
+
+            return;
+         }
+      }
+      else
       {
          if (N_remaining == 0)
-            all_groups.insert(get<0>(group));
+         {
+            all_groups.insert(one_group);
 
-         return;
+            return;
+         }
       }
 
-      // Exit recursion early if possible
       if (N_remaining > N_original)
          return;
 
-      for (my_uint_t n{0}; n <= N_original; ++n)
+      for (my_uint_t n{zeros_allowed ? my_uint_t(0) : my_uint_t(1)}; n <= N_original; ++n)
       {
-         get<0>(group).push_back(n);
-         build_group(N_original, N_remaining - n, k_remaining - 1, group, all_groups);
-         get<0>(group).pop_back();
+         auto rval{visit(insert_visitor_t{n}, one_group)};
+
+         if (rval.second)
+         {
+            build_group(N_original, N_remaining - n, K_original, K_remaining - 1, one_group, all_groups);
+            visit(erase_visitor_t{rval.first}, one_group);
+         }
       }
    }
 
@@ -128,20 +216,34 @@ namespace
                             all_groups_t &all_groups
                          )
    {
-      one_group_t one_group{one_group_vector_t{}};
+      one_group_t one_group{};
 
-      build_group(N, N, K, one_group, all_groups);
+      if (permutations_allowed)
+         one_group = one_group_vector_t{};
+      else
+      {
+         if (duplicates_allowed)
+            one_group = one_group_multiset_t{};
+         else
+            one_group = one_group_set_t{};
+      }
+
+      build_group(N, N, K, K, one_group, all_groups);
    }
 
    void print_results(const all_groups_t &all_groups)
    {
       *output_stream << endl;
 
+      auto print_visitor_t = [](const auto &one_group)
+      {
+         for (my_uint_t one_uint : one_group)
+            *output_stream << one_uint << " ";
+      };
+
       for (const one_group_t &one_group : all_groups)
       {
-         for (my_uint_t one_uint : get<0>(one_group))
-            *output_stream << one_uint << " ";
-
+         visit(print_visitor_t, one_group);
          *output_stream << endl;
       }
 
@@ -169,51 +271,18 @@ namespace
       cerr << "                       default: do not display the count of groups generated" << endl;
       cerr << "   -d, --duplicates    duplicate elements are allowed to be generated" << endl;
       cerr << "                       default: disallow" << endl;
-      cerr << "   -h, --help          print usage; overrides all other flags" << endl;
+      cerr << "   -h, --help          print usage; overrides all other flags and exits" << endl;
       cerr << "   -o, --output=<FILE> send output to <FILE> rather than stdout" << endl;
-      cerr << "   -p, --permutations  all permutations of each group should be generated;" << endl;
+      cerr << "   -p, --permutations  all permutations of each group should be generated" << endl;
       cerr << "                       (but duplicate elements are not permuted)" << endl;
       cerr << "                       default: do not generate permutations" << endl;
       cerr << "   -z, --zero          0 may be used as an element in the groups" << endl;
       cerr << "                       default: 0 may not be used as an element in the groups" << endl;
 
       cerr << endl;
-      cerr << "Valid invocations:" << endl;
-
-      cerr << pn << " [-h | --help]" << endl;
-      cerr << "   Display usage" << endl;
-
-      cerr << endl;
-      cerr << pn
-           << " [-c | --count] [-d | --duplicates] [-h | --help] [-p | --permutations]"
-              " <positive integer> [0]"
-           << endl;
-      cerr << "   -h and --help override all other arguments, display usage, and exit" << endl;
-      cerr << "   Without -z or --zero, N may not be 0" << endl;
-
-      cerr << endl;
-      cerr << pn
-           << " [-c | --count] [-d | --duplicates] [-h | --help] [-p | --permutations] [-z | --zero]"
-              " <positive integer> <positive integer>"
-           << endl;
-      cerr << "   -h and --help override all other arguments, display usage, and exit" << endl;
-
-      cerr << endl;
-      cerr << pn
-           << " [-c | --count] [-d | --duplicates] [-h | --help] [-p | --permutations] -z | --zero"
-              " 0 1"
-           << endl;
-      cerr << "   -h and --help override all other arguments, display usage, and exit" << endl;
-      cerr << "   -d has no effect in this case, but it is not wrong to include it" << endl;
-      cerr << "   -p has no effect in this case, but it is not wrong to include it" << endl;
-
-      cerr << endl;
-      cerr << pn
-           << " [-c | --count] -d | --duplicates [-h | --help] [-p | --permutations] -z | --zero"
-              " 0 <integer >= 2>"
-           << endl;
-      cerr << "   -h and --help override all other arguments, display usage, and exit" << endl;
-      cerr << "   -p has no effect in this case, but it is not wrong to include it" << endl;
+      cerr << "Restrictions:" << endl;
+      cerr << "   With -z or --zero, K must not be 0. This would attempt to create groups of infinite size." << endl;
+      cerr << "   If N = 0, -z or --zero must be present." << endl;
 
       cerr << endl;
       cerr << "Exit status:" << endl;
