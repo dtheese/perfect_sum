@@ -59,6 +59,7 @@ namespace
                             all_groups_t &all_groups
                          );
 
+   void print_parameters();
    void print_results(const all_groups_t &all_groups);
    void print_usage(const char *program_name);
    bool process_args(int argc, char *argv[]);
@@ -84,16 +85,7 @@ int main(int argc, char *argv[])
    }
 
    if (display_arguments)
-   {
-      *output_stream << endl;
-      *output_stream << "Display parameters resulting from command line arguments: " << (display_arguments ? "true" : "false") << endl;
-      *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
-      *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
-      *output_stream << "Permutations allowed: " << (permutations_allowed ? "true" : "false") << endl;
-      *output_stream << "Zeros allowed: " << (zeros_allowed ? "true" : "false") << endl;
-      *output_stream << "N: " << N << endl;
-      *output_stream << "K: " << K << endl;
-   }
+      print_parameters();
 
    all_groups_t all_groups;
 
@@ -235,6 +227,18 @@ namespace
       }
 
       build_group(N, N, K, K, one_group, all_groups);
+   }
+
+   void print_parameters()
+   {
+      *output_stream << endl;
+      *output_stream << "Display parameters resulting from command line arguments: " << (display_arguments ? "true" : "false") << endl;
+      *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
+      *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
+      *output_stream << "Permutations allowed: " << (permutations_allowed ? "true" : "false") << endl;
+      *output_stream << "Zeros allowed: " << (zeros_allowed ? "true" : "false") << endl;
+      *output_stream << "N: " << N << endl;
+      *output_stream << "K: " << K << endl;
    }
 
    void print_results(const all_groups_t &all_groups)
