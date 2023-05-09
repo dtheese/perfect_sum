@@ -259,33 +259,36 @@ namespace
       string pn{program_name != nullptr ? program_name : "<program name>"};
 
       cerr << endl;
-      cerr << "Usage: " << pn << " [OPTION]... <N> [K]" << endl;
-      cerr << "Generate all groups of positive (or, optionally, non-negative) integers that sum to the specified integer N." << endl;
-      cerr << "K is the size of the groups of integers to be returned (K = 0 denotes that any size is acceptable). Default is 0." << endl;
-      cerr << "Optionally, duplicates may be allowed in the generated groups." << endl;
-      cerr << "Optionally, all permutations of the generated groups may also be generated." << endl;
+      cerr << "USAGE" << endl;
+      cerr << pn << " [OPTION]... <N> [K]" << endl;
+      cerr << "   Generate all groups of positive (or, optionally, non-negative) integers that sum to the specified integer N." << endl;
+      cerr << "   K is the size of the groups of integers to be returned (K = 0 denotes that any size is acceptable). Default is 0." << endl;
+      cerr << "   Optionally, duplicates may be allowed in the generated groups." << endl;
+      cerr << "   Optionally, all permutations of the generated groups may also be generated." << endl;
 
       cerr << endl;
-      cerr << "Mandatory arguments to long options are mandatory for short options too." << endl;
-      cerr << "   -c, --count         display the count of groups generated" << endl;
-      cerr << "                       default: do not display the count of groups generated" << endl;
-      cerr << "   -d, --duplicates    duplicate elements are allowed to be generated" << endl;
-      cerr << "                       default: disallow" << endl;
-      cerr << "   -h, --help          print usage; overrides all other flags and exits" << endl;
-      cerr << "   -o, --output=<FILE> send output to <FILE> rather than stdout" << endl;
-      cerr << "   -p, --permutations  all permutations of each group should be generated" << endl;
+      cerr << "OPTIONS" << endl;
+      cerr << "   Mandatory arguments to long options are mandatory for short options too." << endl;
+      cerr << endl;
+      cerr << "   -c, --count         Display the count of groups generated" << endl;
+      cerr << "                       Default: Do not display the count of groups generated" << endl;
+      cerr << "   -d, --duplicates    Duplicate elements are allowed to be generated" << endl;
+      cerr << "                       Default: Do not allow duplicate elements" << endl;
+      cerr << "   -h, --help          Print usage; overrides all other flags and exits" << endl;
+      cerr << "   -o, --output=<FILE> Send output to <FILE> rather than stdout" << endl;
+      cerr << "   -p, --permutations  All permutations of each group should be generated" << endl;
       cerr << "                       (but duplicate elements are not permuted)" << endl;
-      cerr << "                       default: do not generate permutations" << endl;
+      cerr << "                       Default: Do not generate permutations" << endl;
       cerr << "   -z, --zero          0 may be used as an element in the groups" << endl;
-      cerr << "                       default: 0 may not be used as an element in the groups" << endl;
+      cerr << "                       Default: 0 may not be used as an element in the groups" << endl;
 
       cerr << endl;
-      cerr << "Restrictions:" << endl;
+      cerr << "RESTRICTIONS" << endl;
       cerr << "   With -z or --zero, K must not be 0. This would attempt to create groups of infinite size." << endl;
       cerr << "   If N = 0, -z or --zero must be present." << endl;
 
       cerr << endl;
-      cerr << "Exit status:" << endl;
+      cerr << "EXIT STATUS" << endl;
       cerr << "   0 if groups could be generated as dictated by the command line arguments and flags" << endl;
       cerr << "   1 if groups could not be generated as dictated by the command line arguments and flags" << endl;
    }
