@@ -116,7 +116,8 @@ namespace
          {
             if (
                   duplicates_allowed ||
-                  find(one_group_vector.cbegin(), one_group_vector.cend(), n) == one_group_vector.cend())
+                  find(one_group_vector.cbegin(), one_group_vector.cend(), n) == one_group_vector.cend()
+               )
             {
                one_group_vector.push_back(n);
 
