@@ -341,6 +341,9 @@ namespace
             if (bad_arg_found) break;
          }
 
+         // If output is to go to a file, this variable will hold the filename
+         string filename;
+
          {
             // Set the value of command line flags that are not default
             bool bad_arg_found{false};
@@ -364,24 +367,12 @@ namespace
                }
                else if (s.find("-o=") == 0 || s.find("--output=") == 0)
                {
-                  string filename;
-
                   if (s[2] == '=')
                      filename = s.substr(3);
                   else if (s[8] == '=')
                      filename = s.substr(9);
                   else
                      assert(0); // Should never reach this due to prior regex match
-
-                  ostream_up_t ostream_up{new ofstream{filename}, ostream_conditional_deleter{true}};
-
-                  if (! ostream_up || ! (dynamic_cast<ofstream *>(ostream_up.get()))->is_open())
-                  {
-                     bad_arg_found = true;
-                     break;
-                  }
-
-                  output_stream = move(ostream_up);
                }
                else if (s == "-p" || s == "--permutations")
                   permutations_allowed = true;
@@ -409,6 +400,18 @@ namespace
          // Check if the command line arguments are semantically OK
          if (zeros_allowed && K == 0) break;
          if (! zeros_allowed && N == 0) break;
+
+         // All that's left is to ensure that if output is to go to a file that that
+         // file can be opened.
+         if (filename != "")
+         {
+            ostream_up_t ostream_up{new ofstream{filename}, ostream_conditional_deleter{true}};
+
+            if (! ostream_up || ! (dynamic_cast<ofstream *>(ostream_up.get()))->is_open())
+               break;
+
+            output_stream = move(ostream_up);
+         }
 
          // We made it! All arguments are both syntactically and semantically good!
          args_are_valid = true;
