@@ -294,6 +294,7 @@ namespace
       string pn{program_name != nullptr ? program_name : "<program name>"};
 
       cerr << "USAGE" << endl;
+      cerr << pn << " [-h | --help]" << endl;
       cerr << pn << " [OPTION]... <N> [K]" << endl;
 
       cerr << "   Generate all groups of positive (or, optionally, non-negative)"
