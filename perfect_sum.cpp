@@ -3,10 +3,12 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <ostream>
 #include <regex>
 #include <set>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <variant>
@@ -59,6 +61,7 @@ namespace
                             all_groups_t &all_groups
                          );
 
+   void print_error(const string &message);
    void print_parameters();
    void print_results(const all_groups_t &all_groups);
    void print_usage(const char *program_name);
@@ -80,16 +83,10 @@ int main(int argc, char *argv[])
    if (! process_args(argc, argv))
       return 1;
 
-   if (display_arguments)
-      print_parameters();
-
    all_groups_t all_groups;
 
    find_perfect_sums(N, K, all_groups);
    print_results(all_groups);
-
-   if (output_stream.get() == &cout)
-      *output_stream << endl;
 }
 
 namespace
@@ -99,11 +96,16 @@ namespace
       public:
          insert_visitor_t(my_uint_t n_p): n{n_p} {}
 
-         pair<one_group_iterator_t, bool> operator()(one_group_vector_t &one_group_vector) const
+         pair<one_group_iterator_t, bool>
+         operator()(one_group_vector_t &one_group_vector) const
          {
             if (
                   duplicates_allowed ||
-                  find(one_group_vector.cbegin(), one_group_vector.cend(), n) == one_group_vector.cend()
+                  find(
+                         one_group_vector.cbegin(),
+                         one_group_vector.cend(),
+                         n
+                      ) == one_group_vector.cend()
                )
             {
                one_group_vector.push_back(n);
@@ -114,7 +116,8 @@ namespace
             return {one_group_iterator_t{}, false};
          }
 
-         pair<one_group_iterator_t, bool> operator()(one_group_set_t &one_group_set) const
+         pair<one_group_iterator_t, bool>
+         operator()(one_group_set_t &one_group_set) const
          {
             auto rval{one_group_set.insert(n)};
             one_group_set_t::iterator iter{rval.first};
@@ -123,7 +126,8 @@ namespace
             return {one_group_iterator, rval.second};
          }
 
-         pair<one_group_iterator_t, bool> operator()(one_group_multiset_t &one_group_multiset) const
+         pair<one_group_iterator_t, bool>
+         operator()(one_group_multiset_t &one_group_multiset) const
          {
             one_group_multiset_t::iterator iter{one_group_multiset.insert(n)};
             one_group_iterator_t one_group_iterator{in_place_index<2>, iter};
@@ -138,7 +142,8 @@ namespace
    class erase_visitor_t
    {
       public:
-         erase_visitor_t(one_group_iterator_t one_group_iterator_p): one_group_iterator{one_group_iterator_p} {}
+         erase_visitor_t(one_group_iterator_t one_group_iterator_p):
+            one_group_iterator{one_group_iterator_p} {}
 
          void operator()(one_group_vector_t &one_group_vector) const
          {
@@ -197,7 +202,15 @@ namespace
 
          if (rval.second)
          {
-            build_group(N_original, N_remaining - n, K_original, K_remaining - 1, one_group, all_groups);
+            build_group(
+                          N_original,
+                          N_remaining - n,
+                          K_original,
+                          K_remaining - 1,
+                          one_group,
+                          all_groups
+                       );
+
             visit(erase_visitor_t{rval.first}, one_group);
          }
       }
@@ -224,9 +237,22 @@ namespace
       build_group(N, N, K, K, one_group, all_groups);
    }
 
+   void print_error(const string &message)
+   {
+      cerr << "ERROR: " << message << endl;
+      cerr << endl;
+      cerr << "Press Enter to print usage and exit. ";
+
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+      cerr << endl;
+   }
+
    void print_parameters()
    {
-      *output_stream << "Display parameters resulting from command line arguments: " << (display_arguments ? "true" : "false") << endl;
+      *output_stream << "Display parameters resulting from command line arguments: "
+                     << (display_arguments ? "true" : "false")
+                     << endl;
+
       *output_stream << "Display group count: " << (display_group_count ? "true" : "false") << endl;
       *output_stream << "Duplicates allowed: " << (duplicates_allowed ? "true" : "false") << endl;
       *output_stream << "Permutations allowed: " << (permutations_allowed ? "true" : "false") << endl;
@@ -253,8 +279,14 @@ namespace
       if (display_group_count)
       {
          *output_stream << endl;
-         *output_stream << "Group count: " << all_groups.size() << endl;
+
+         *output_stream << "Group count: "
+                        << all_groups.size()
+                        << endl;
       }
+
+      if (output_stream.get() == &cout)
+         *output_stream << endl;
    }
 
    void print_usage(const char *program_name)
@@ -263,37 +295,65 @@ namespace
 
       cerr << "USAGE" << endl;
       cerr << pn << " [OPTION]... <N> [K]" << endl;
-      cerr << "   Generate all groups of positive (or, optionally, non-negative) integers that sum to the specified integer N." << endl;
-      cerr << "   K is the size of the groups of integers to be returned (K = 0 denotes that any size is acceptable). Default is 0." << endl;
-      cerr << "   Optionally, duplicates may be allowed in the generated groups." << endl;
-      cerr << "   Optionally, all permutations of the generated groups may also be generated." << endl;
+
+      cerr << "   Generate all groups of positive (or, optionally, non-negative)"
+           << endl
+           << "   integers that sum to the specified integer N."
+           << endl
+           << endl;
+
+      cerr << "   K is the size of the groups of integers to be returned."
+           << endl
+           << "   K = 0 returns all groups that sum to N, regardless of size."
+           << endl
+           << "   Default: 0"
+           << endl
+           << endl;
+
+      cerr << "   Optionally, duplicates may be allowed in the generated groups."
+           << endl;
+
+      cerr << "   Optionally, all permutations of the generated groups may be generated."
+           << endl;
 
       cerr << endl;
       cerr << "OPTIONS" << endl;
       cerr << "   Mandatory arguments to long options are mandatory for short options too." << endl;
       cerr << endl;
-      cerr << "   -a, --arguments     Display parameters resulting from command line arguments" << endl;
-      cerr << "   -c, --count         Display the count of groups generated" << endl;
+      cerr << "   -a, --arguments     Display parameters resulting from command line arguments." << endl;
+      cerr << "   -c, --count         Display the count of groups generated." << endl;
       cerr << "                       Default: Do not display the count of groups generated" << endl;
-      cerr << "   -d, --duplicates    Duplicate elements are allowed to be generated" << endl;
+      cerr << "   -d, --duplicates    Duplicate elements are allowed to be generated." << endl;
       cerr << "                       Default: Do not allow duplicate elements" << endl;
       cerr << "   -h, --help          Print usage; overrides all other flags and exits" << endl;
-      cerr << "   -o, --output=<FILE> Send output to <FILE> rather than stdout" << endl;
-      cerr << "   -p, --permutations  All permutations of each group should be generated" << endl;
+      cerr << "   -o, --output=<FILE> Send output to <FILE> rather than stdout." << endl;
+      cerr << "   -p, --permutations  All permutations of each group should be generated." << endl;
       cerr << "                       (but duplicate elements are not permuted)" << endl;
       cerr << "                       Default: Do not generate permutations" << endl;
-      cerr << "   -z, --zero          0 may be used as an element in the groups" << endl;
+      cerr << "   -z, --zero          0 may be used as an element in the groups." << endl;
       cerr << "                       Default: 0 may not be used as an element in the groups" << endl;
 
       cerr << endl;
       cerr << "RESTRICTIONS" << endl;
-      cerr << "   With -z or --zero, K must not be 0. This would attempt to create groups of infinite size." << endl;
-      cerr << "   If N = 0, -z or --zero must be present." << endl;
+
+      cerr << "   With -z or --zero, K must not be 0. "
+              "This would attempt to create groups of infinite size."
+           << endl;
+
+      cerr << "   If N = 0, -z or --zero must be present."
+           << endl;
 
       cerr << endl;
       cerr << "EXIT STATUS" << endl;
-      cerr << "   0 if groups could be generated as dictated by the command line arguments and flags" << endl;
-      cerr << "   1 if groups could not be generated as dictated by the command line arguments and flags" << endl;
+
+      cerr << "   0 if groups could be generated as dictated by "
+              "the command line arguments and flags."
+           << endl;
+ 
+      cerr << "   1 if groups could not be generated as dictated by "
+              "the command line arguments and flags."
+           << endl;
+
       cerr << endl;
    }
 
@@ -303,15 +363,18 @@ namespace
 
       do
       {
-         if (argc < 2) break;
+         if (argc < 2)
+            break;
 
-         // This regex is intended to be applied to each individual argument, not to the entire command line
+         // This regex is intended to be applied to each individual argument,
+         // not to the entire command line
          const string arg_regex_string {
                                           "(-a|--arguments)|"
                                           "(-c|--count)|"
                                           "(-d|--duplicates)|"
                                           "(-h|--help)|"
-                                          "((-o|--output)=(([[:alnum:]][[:alnum:]_-]*)(\\.[[:alnum:]][[:alnum:]_-]*)?))|"
+                                          "((-o|--output)=(([[:alnum:]][[:alnum:]_-]*)"
+                                             "(\\.[[:alnum:]][[:alnum:]_-]*)?))|"
                                           "(-p|--permutations)|"
                                           "(-z|--zeros)|"
                                           "([0-9]+)"
@@ -334,6 +397,11 @@ namespace
                if (smatch m; ! regex_match(s, m, arg_regex))
                {
                   bad_arg_found = true;
+
+                  stringstream message;
+                  message << "Invalid argument " << s << " found";
+                  print_error(message.str());
+
                   break;
                }
             }
@@ -346,7 +414,6 @@ namespace
 
          {
             // Set the value of command line flags that are not default
-            bool bad_arg_found{false};
             bool help_requested{false};
             my_uint_t arg_index{0};
 
@@ -379,27 +446,89 @@ namespace
                else if (s == "-z" || s == "--zeros")
                   zeros_allowed = true;
                else
-                  break; // Now we expect no more command line flags
+                  break; // We should now be done with flags and ready to read <N>
             }
 
-            if (bad_arg_found || help_requested) break;
+            if (help_requested) break;
 
             // Extract <N> [K] command line argument(s)
             // Note that these must be in this order and must be the last argument(s)
-            if (arg_index == args_as_strings.size()) break; // <N> is required but missing
-            try {N = stoul(args_as_strings[arg_index++]);} catch(...) {break;}
+
+            if (arg_index == args_as_strings.size())
+            {
+               print_error("<N> is required but is missing");
+
+               break;
+            }
+
+            try
+            {
+               N = stoul(args_as_strings[arg_index]);
+               ++arg_index;
+            }
+            catch(...)
+            {
+               // Should never reach this due to prior regex match
+               stringstream message;
+
+               message << "Invalid argument "
+                       << args_as_strings[arg_index]
+                       << " found where <N> is expected";
+
+               print_error(message.str());
+
+               break;
+            }
 
             // If there's another argument, it must be K (which is optional)
             if (arg_index < args_as_strings.size())
-               try {K = stoul(args_as_strings[arg_index++]);} catch(...) {break;}
+            {
+               try
+               {
+                  K = stoul(args_as_strings[arg_index]);
+                  ++arg_index;
+               }
+               catch(...)
+               {
+                  // Should never reach this due to prior regex match
+                  stringstream message;
+
+                  message << "Invalid argument "
+                          << args_as_strings[arg_index]
+                          << " found where [K] is expected";
+
+                  print_error(message.str());
+
+                  break;
+               }
+            }
 
             // Ensure there are no more arguments
-            if (arg_index != args_as_strings.size()) break;
+            if (arg_index != args_as_strings.size())
+            {
+               print_error("Too many arguments");
+
+               break;
+            }
          }
 
          // Check if the command line arguments are semantically OK
-         if (zeros_allowed && K == 0) break;
-         if (! zeros_allowed && N == 0) break;
+         if (zeros_allowed && K == 0)
+         {
+            print_error(
+                          "With -z or --zero, K must not be 0. "
+                          "This would attempt to create groups of infinite size."
+                       );
+
+            break;
+         }
+
+         if (! zeros_allowed && N == 0)
+         {
+            print_error("If N = 0, -z or --zero must be present.");
+
+            break;
+         }
 
          // All that's left is to ensure that if output is to go to a file that that
          // file can be opened.
@@ -408,7 +537,14 @@ namespace
             ostream_up_t ostream_up{new ofstream{filename}, ostream_conditional_deleter{true}};
 
             if (! ostream_up || ! (dynamic_cast<ofstream *>(ostream_up.get()))->is_open())
+            {
+               stringstream message;
+
+               message << "Could not open output file " << filename;
+               print_error(message.str());
+
                break;
+            }
 
             output_stream = move(ostream_up);
          }
@@ -420,6 +556,8 @@ namespace
 
       if (! args_are_valid)
          print_usage(argv[0]);
+      else if (display_arguments)
+         print_parameters();
 
       return args_are_valid;
    }
