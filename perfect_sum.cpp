@@ -311,7 +311,7 @@ namespace
                                           "(-c|--count)|"
                                           "(-d|--duplicates)|"
                                           "(-h|--help)|"
-                                          "((-o|--output)=(([[:alnum:]][[:alnum:]_-]*)(\\.)([[:alnum:]][[:alnum:]_-]*)?))|"
+                                          "((-o|--output)=(([[:alnum:]][[:alnum:]_-]*)(\\.[[:alnum:]][[:alnum:]_-]*)?))|"
                                           "(-p|--permutations)|"
                                           "(-z|--zeros)|"
                                           "([0-9]+)"
