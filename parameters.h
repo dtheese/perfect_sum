@@ -2,7 +2,6 @@
 #define PARAMETERS_INCLUDED
 
 #include "fundamental_types.h"
-#include "ostream_conditional_deleter.h"
 #include "type_aliases.h"
 
 extern bool display_arguments;
