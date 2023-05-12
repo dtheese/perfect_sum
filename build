@@ -1,3 +1,38 @@
 #!/bin/bash
 
-g++ -std=c++17 -o perfect_sum perfect_sum.cpp
+set -o nounset
+set -o errexit
+set -o pipefail
+
+declare -r HEADER_TEST_DIR=header_tests
+
+mkdir -p $HEADER_TEST_DIR
+
+for ONE_FILE in $(ls *.h)
+do
+   FILENAME_BASE=$(basename $ONE_FILE)
+   FILENAME_NO_SUFFIX=${FILENAME_BASE%.*}
+   HEADER_TEST=$HEADER_TEST_DIR/${FILENAME_NO_SUFFIX}_header_test.cpp
+
+   if [[ ! -f $HEADER_TEST ]]; then
+      echo "#include \"$FILENAME_BASE\"" >  $HEADER_TEST
+      echo ""                            >> $HEADER_TEST
+      echo "int main()"                  >> $HEADER_TEST
+      echo "{"                           >> $HEADER_TEST
+      echo "}"                           >> $HEADER_TEST
+   fi
+done
+
+cd $HEADER_TEST_DIR
+g++ -std=c++17 -Wall -Wpedantic -Wextra -c -I .. *.cpp
+rm -f *.o *.cpp
+
+cd ..
+rmdir $HEADER_TEST_DIR
+rm -f perfect_sum
+
+# This is my preferred compiler invocation. However, this has been seen in some
+# cases to generate incorrect code. If this happens, try less aggressive optimization.
+g++ -std=c++17 -Wall -Wpedantic -Wextra -o perfect_sum *.cpp
+
+exit 0
