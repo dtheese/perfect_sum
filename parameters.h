@@ -1,8 +1,6 @@
 #ifndef PARAMETERS_INCLUDED
 #define PARAMETERS_INCLUDED
 
-using namespace std;
-
 #include "fundamental_types.h"
 #include "ostream_conditional_deleter.h"
 #include "type_aliases.h"
