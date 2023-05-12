@@ -23,10 +23,4 @@ void find_perfect_sums(
                          all_groups_t &all_groups
                       );
 
-void print_error(const string &message);
-void print_parameters();
-void print_results(const all_groups_t &all_groups);
-void print_usage(const char *program_name);
-bool process_args(int argc, char *argv[]);
-
 #endif
