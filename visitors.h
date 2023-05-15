@@ -11,7 +11,7 @@ using namespace std;
 class insert_visitor_t
 {
    public:
-      insert_visitor_t(my_uint_t n_p);
+      explicit insert_visitor_t(my_uint_t n_p);
 
       pair<one_group_iterator_t, bool>
       operator()(one_group_vector_t &one_group_vector) const;
@@ -29,7 +29,7 @@ class insert_visitor_t
 class erase_visitor_t
 {
    public:
-      erase_visitor_t(one_group_iterator_t one_group_iterator_p);
+      explicit erase_visitor_t(one_group_iterator_t one_group_iterator_p);
 
       void operator()(one_group_vector_t &one_group_vector) const;
       void operator()(one_group_set_t &one_group_set) const;

@@ -8,7 +8,7 @@ using namespace std;
 class ostream_conditional_deleter
 {
    public:
-      ostream_conditional_deleter(bool must_delete_p): must_delete{must_delete_p} {}
+      explicit ostream_conditional_deleter(bool must_delete_p): must_delete{must_delete_p} {}
       void operator()(ostream *os) const { if (must_delete) delete os; }
 
    private:
