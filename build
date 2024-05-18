@@ -24,7 +24,7 @@ do
 done
 
 cd $HEADER_TEST_DIR
-g++ -std=c++17 -Wall -Wpedantic -Wextra -c -I .. *.cpp
+g++ -std=c++20 -Wall -Wpedantic -Wextra -c -I .. *.cpp
 rm -f *.o *.cpp
 
 cd ..
@@ -33,6 +33,6 @@ rm -f perfect_sum
 
 # This is my preferred compiler invocation. However, this has been seen in some
 # cases to generate incorrect code. If this happens, try less aggressive optimization.
-g++ -std=c++17 -Wall -Wpedantic -Wextra -o perfect_sum *.cpp
+g++ -std=c++20 -Wall -Wpedantic -Wextra -o perfect_sum *.cpp
 
 exit 0
