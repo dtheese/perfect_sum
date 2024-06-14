@@ -31,8 +31,6 @@ cd ..
 rmdir $HEADER_TEST_DIR
 rm -f perfect_sum
 
-# This is my preferred compiler invocation. However, this has been seen in some
-# cases to generate incorrect code. If this happens, try less aggressive optimization.
 g++ -std=c++20 -Wall -Wpedantic -Wextra -o perfect_sum *.cpp
 
 exit 0
