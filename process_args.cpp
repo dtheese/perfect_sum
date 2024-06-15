@@ -88,7 +88,7 @@ bool process_args(int argc, char *argv[])
                help_requested = true;
                break;
             }
-            else if (s.find("-o=") == 0 || s.find("--output=") == 0)
+            else if (s.starts_with("-o=") || s.starts_with("--output="))
             {
                if (s[2] == '=')
                   filename = s.substr(3);

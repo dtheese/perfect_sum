@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+declare -r CPPCHECK_DIR=cppcheck-build-dir
+
+echo "USAGE:"
+echo "$0 [-c]"
+echo "   -c: Clean the cppcheck build directory before running cppcheck"
+echo
+
+mkdir -p $CPPCHECK_DIR
+
+if [[ $# -ge 1 && $1 == "-c" ]]; then
+   rm -f $CPPCHECK_DIR/*
+fi
+
+cppcheck --std=c++20 --enable=all --check-level=exhaustive --suppressions-list=suppressions.txt --cppcheck-build-dir=$CPPCHECK_DIR *.cpp
+
+exit 0

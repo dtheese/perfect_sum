@@ -1,0 +1,7 @@
+// This file contains a list of error suppressions for cppcheck to use
+
+// Ths prevents complaints about not seeing standard library headers
+missingIncludeSystem
+
+// Suppress other unwanted warnings
+internalAstError:perfect_sum.cpp
