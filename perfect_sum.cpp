@@ -60,8 +60,8 @@ void build_group(
 }
 
 void find_perfect_sums(
-                         const my_uint_t N,
-                         const my_uint_t K,
+                         const my_uint_t N_p,
+                         const my_uint_t K_p,
                          all_groups_t &all_groups
                       )
 {
@@ -77,5 +77,5 @@ void find_perfect_sums(
          one_group = one_group_set_t{};
    }
 
-   build_group(N, N, K, K, one_group, all_groups);
+   build_group(N_p, N_p, K_p, K_p, one_group, all_groups);
 }

@@ -18,8 +18,8 @@ void build_group(
                 );
 
 void find_perfect_sums(
-                         const my_uint_t N,
-                         const my_uint_t K,
+                         const my_uint_t N_p,
+                         const my_uint_t K_p,
                          all_groups_t &all_groups
                       );
 
